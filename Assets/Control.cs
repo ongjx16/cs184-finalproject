@@ -15,10 +15,14 @@ public class Control : MonoBehaviour
     public float min_fov = 5.0f;
     public float max_fov = 100.0f;
     public float zoom_speed = 1000.0f;
+    private Vector3 originalPosition;
+    private Quaternion originalRotation;
     // Start is called before the first frame update
     void Start()
     {
         Debug.Log("Camera control is activated!");
+        originalPosition = transform.position;
+        originalRotation = transform.rotation;
         controlCamera = Camera.main;
         if(controlCamera!=null){
             controlCamera.fieldOfView = default_fov;
@@ -66,7 +70,6 @@ public class Control : MonoBehaviour
            transform.position += worldYMovement();
         }
 
-
         // Camera Panning if left mousebutton is clicked down
         if(Input.GetMouseButton(0)){
             transform.eulerAngles += panCamera();
@@ -79,6 +82,23 @@ public class Control : MonoBehaviour
         }
         else if(scroll<0f){
             controlCamera.fieldOfView = Mathf.Min(controlCamera.fieldOfView + zoom_speed * Time.deltaTime, max_fov);
+        }
+
+        //Change Roll of camera
+        if(Input.GetKey(KeyCode.Q)){
+            transform.eulerAngles += new Vector3(0,0,-0.05f*pan_sensitivity);
+        }
+        if(Input.GetKey(KeyCode.E)){
+            transform.eulerAngles += new Vector3(0,0,0.05f*pan_sensitivity);
+        }
+        if(Input.GetKeyDown(KeyCode.F)){
+            transform.eulerAngles = new Vector3(transform.eulerAngles.x,transform.eulerAngles.y,0);
+        }
+
+        //Reset to original camera position
+        if(Input.GetKeyDown(KeyCode.R)){
+            transform.position = originalPosition;
+            transform.rotation = originalRotation;
         }
     }
     Vector3 verticalMovement(){
