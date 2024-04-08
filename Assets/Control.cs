@@ -4,16 +4,28 @@ using UnityEngine;
 
 public class Control : MonoBehaviour
 {
-    public float speed = 10.0f;
-    public float sensitivity = 5.0f;
+    public float move_speed = 10.0f;
+    public float pan_sensitivity = 5.0f;
     private bool isWaitingForSecondTap = false; 
     private float timeOfLastTap = 0;
     private bool fly = false;
     public float doubleTapThreshold = 0.5f;
+    public Camera controlCamera;
+    public float default_fov = 60.0f;
+    public float min_fov = 5.0f;
+    public float max_fov = 100.0f;
+    public float zoom_speed = 1000.0f;
     // Start is called before the first frame update
     void Start()
     {
         Debug.Log("Camera control is activated!");
+        controlCamera = Camera.main;
+        if(controlCamera!=null){
+            controlCamera.fieldOfView = default_fov;
+        }
+        else{
+            Debug.Log("Camera not chosen!");
+        }
     }
 
     // Update is called once per frame
@@ -59,19 +71,28 @@ public class Control : MonoBehaviour
         if(Input.GetMouseButton(0)){
             transform.eulerAngles += panCamera();
         }
+
+        //Change FOV using scroll wheel
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if(scroll>0f){
+            controlCamera.fieldOfView = Mathf.Max(controlCamera.fieldOfView - zoom_speed * Time.deltaTime, min_fov);
+        }
+        else if(scroll<0f){
+            controlCamera.fieldOfView = Mathf.Min(controlCamera.fieldOfView + zoom_speed * Time.deltaTime, max_fov);
+        }
     }
     Vector3 verticalMovement(){
-        return transform.forward * Input.GetAxis("Vertical") * speed * Time.deltaTime;
+        return transform.forward * Input.GetAxis("Vertical") * move_speed * Time.deltaTime;
     }
     Vector3 horizontalMovement(){
-        return transform.right * Input.GetAxis("Horizontal") * speed * Time.deltaTime;
+        return transform.right * Input.GetAxis("Horizontal") * move_speed * Time.deltaTime;
     }
     Vector3 worldYMovement(){
-        return Vector3.up * speed * Time.deltaTime;
+        return Vector3.up * move_speed * Time.deltaTime;
     }
     Vector3 panCamera(){
         float mouseX = Input.GetAxis("Mouse X");
         float mouseY = Input.GetAxis("Mouse Y");
-        return new Vector3(-mouseY * sensitivity, mouseX * sensitivity, 0);
+        return new Vector3(-mouseY * pan_sensitivity, mouseX * pan_sensitivity, 0);
     }
 }
