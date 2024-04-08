@@ -20,13 +20,13 @@ public class Control : MonoBehaviour
     void Update()
     {
         //Left and right movement of camera depending on where the camera is facing using WASD or arrow keys
-        transform.position += transform.forward * Input.GetAxis("Vertical") * speed * Time.deltaTime;
-        transform.position += transform.right * Input.GetAxis("Horizontal") * speed * Time.deltaTime;
+        transform.position += verticalMovement();
+        transform.position += horizontalMovement();
 
         //Allows for desecent in world y axis regardless of where the camera is facing
-        if(Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        if(Input.GetKey(KeyCode.LeftShift))
         {
-            transform.position -= Vector3.up * speed * Time.deltaTime;
+            transform.position -= worldYMovement();
         }
 
         //Doubletap spacebar to fly vertically upward
@@ -51,15 +51,27 @@ public class Control : MonoBehaviour
             fly = false;
         }
         if(Input.GetKey(KeyCode.Space) && fly){
-           transform.position += Vector3.up * speed * Time.deltaTime;
+           transform.position += worldYMovement();
         }
 
 
         // Camera Panning if left mousebutton is clicked down
         if(Input.GetMouseButton(0)){
-            float mouseX = Input.GetAxis("Mouse X");
-            float mouseY = Input.GetAxis("Mouse Y");
-            transform.eulerAngles += new Vector3(-mouseY * sensitivity, mouseX * sensitivity, 0);
+            transform.eulerAngles += panCamera();
         }
+    }
+    Vector3 verticalMovement(){
+        return transform.forward * Input.GetAxis("Vertical") * speed * Time.deltaTime;
+    }
+    Vector3 horizontalMovement(){
+        return transform.right * Input.GetAxis("Horizontal") * speed * Time.deltaTime;
+    }
+    Vector3 worldYMovement(){
+        return Vector3.up * speed * Time.deltaTime;
+    }
+    Vector3 panCamera(){
+        float mouseX = Input.GetAxis("Mouse X");
+        float mouseY = Input.GetAxis("Mouse Y");
+        return new Vector3(-mouseY * sensitivity, mouseX * sensitivity, 0);
     }
 }
