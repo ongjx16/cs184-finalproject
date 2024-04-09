@@ -1,0 +1,24 @@
+// cluster.compute
+
+#pragma kernel clusterCompute
+
+RWStructuredBuffer<float3> _posBuffer;
+int fieldSize, grassSize,grassPerCluster, x_offset, y_offset;
+float3 origin;
+
+
+// Compute shaders use shared memory, registers, and other limited resources. Using a power-of-two size helps in avoiding fragmentation of these resources, ensuring that they are utilized effectively without leaving small unutilized gaps
+[numthreads(1,1,1)]
+void clusterCompute(uint3 id : SV_DispatchThreadID) {
+    // make sure its rendering within the bounds of the field
+    if (id.x < uint(fieldSize) && id.z < uint(fieldSize)) {
+        float3 pos = 0.0f;
+
+        pos.x = id.x * grassSize + grassSize * 0.5 + x_offset;
+        pos.z = id.z * grassSize + grassSize * 0.5 + y_offset;
+        // pos.x = id.x;
+        // pos.z = id.z;
+
+        _posBuffer[id.x + id.z * grassPerCluster] = pos;
+    }
+}
