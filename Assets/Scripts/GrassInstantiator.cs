@@ -126,6 +126,8 @@ public class GrassInstantiator : MonoBehaviour
             // second arg: numthreads[x,y,z]; this means we are dispatching the clustershader for each cluster to be number of grass objects in x axis x number of grass objects in y axis x 1 (2d grid of grass);
             clusterShader.Dispatch(0, grassPerCluster, 1, grassPerCluster);
 
+
+            /***FOR DEBUGGING ***/
             int bufferCount = grassPerCluster*grassPerCluster;
             Vector3[] positions = new Vector3[bufferCount];
             cluster.posBuffer.GetData(positions);
@@ -135,6 +137,7 @@ public class GrassInstantiator : MonoBehaviour
             {
                 Debug.Log($"Position {i}: {positions[i]}");
             }
+            /*** ***/
         }
         else
         {

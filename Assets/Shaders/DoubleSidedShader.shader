@@ -35,7 +35,7 @@ Shader "Custom/DoubleSidedInstanced"
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
-            fixed4 _Color;
+            float4 _Color;
 
             // Define the buffer that holds positions
             StructuredBuffer<float3> _Positions;
@@ -50,9 +50,9 @@ Shader "Custom/DoubleSidedInstanced"
                 return o;
             }
 
-            fixed4 frag (v2f i) : SV_Target
+            float4 frag (v2f i) : SV_Target
             {
-                fixed4 col = tex2D(_MainTex, i.uv) * _Color;
+                float4 col = tex2D(_MainTex, i.uv) * _Color;
                 return col;
             }
             ENDCG
