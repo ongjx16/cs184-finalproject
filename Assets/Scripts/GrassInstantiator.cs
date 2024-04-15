@@ -4,161 +4,92 @@ using UnityEngine;
 
 public class GrassInstantiator : MonoBehaviour
 {
-    //assigned by code
+    // -- Public variables to be assigned in unity editor. --
     public Mesh grassMesh;
-    //assigned in unity editor
     public Material grassMaterial;
 
-    // private ComputeBuffer positionBuffer;
+    // `resolution`: The length of the terrain on the x and z axis.
+    public int resolution = 100;
 
-    // //buffer of indirect arguments (e.g. ) to be used later on in Graphics.DrawMeshInstancedIndirect to render the mesh with positions from the position Buffer
-    // private ComputeBuffer argsBuffer;
+    // `scale`: The number of grass clusters to render in each length unit.
+    // Eg. If `resolution` = 100 and `scale` = 2, we render 200 grass clusters on the x and z axis each.
+    public int scale = 1;
+    
+    // -- Private variables to be assigned in code. --
+    // `grassMaterial2`, `grassMaterial3`: Rotated grass image. Together with `grassMaterial`, these 3 grass images form the complete grass cluster. 
+    private Material grassMaterial2, grassMaterial3;
 
-    private struct GrassData
-    {
-        public Vector3 position;
-        // public Vector2 uv;
-    }
-    int grassDataSize = (3 * 4); // 12 bytes for vector3
+    // `initializeGrassShader`: The compute shader script found in `Resources/clusterCompute.compute`. Runs on the GPU.
+    private ComputeShader initializeGrassShader;
 
+    // `grassDataBuffer`: Buffer / Array of all positions of grass clusters
+    // `argsBuffer`: Buffer of indirect arguments to be used later on in in Graphics.DrawMeshInstancedIndirect to render the mesh with positions from the grass data buffer.
+    private ComputeBuffer grassDataBuffer, argsBuffer;
+
+    // `GrassCluster`: Data for each grass cluster.
+    // A grass cluster consists of 3 meshes of grass images placed in a asterisk (*)-like arrangement.
     private struct GrassCluster
     {
-        public ComputeBuffer argsBuffer;
-        public ComputeBuffer posBuffer;
-        public Material material;
+        public Vector4 position;
     }
 
-    //to be used for every args buffer initialised for each grass chunk
-    uint[] args;
-    GrassCluster[] allClusters;
-
-    private int numClusters = 10;
-    private int clusterSize;
-    private int grassPerCluster = 5;
-
-    //length of one side of the field
-    private int fieldSize = 500;
-    // private int clusterDensity = 1;
-
-    Bounds bounds;
-    private ComputeShader clusterShader;
-
-
-    // Start is called before the first frame update
+    // Start is called before the first frame update.
+    // Sets up the necessary variables before drawing.
     void Start()
     {
-        clusterSize = fieldSize / numClusters;
-        // grassPerCluster = clusterSize * clusterDensity;
-        // clusterSize = grassPerCluster;
-        // grassPerCluster *= grassPerCluster;
-
-        clusterShader = Resources.Load<ComputeShader>("clusterCompute");
-        if (clusterShader == null)
+        initializeGrassShader = Resources.Load<ComputeShader>("clusterCompute");
+        if (initializeGrassShader == null)
         {
             Debug.LogError("compute shader not found");
         }
 
-        clusterShader.SetInt("fieldSize", fieldSize);
-        clusterShader.SetInt("grassSize", clusterSize/grassPerCluster);
-        clusterShader.SetInt("grassPerCluster", grassPerCluster);
+        resolution *= scale;
+        grassDataBuffer = new ComputeBuffer(resolution * resolution, 4 * 4);
+        argsBuffer = new ComputeBuffer(1, 5 * sizeof(int), ComputeBufferType.IndirectArguments);
 
-        var grassMeshScript = FindObjectOfType<GrassMesh>(); // Find the GrassMesh component
-        if (grassMeshScript != null)
-        {
-            grassMesh = grassMeshScript.generatedMesh; // Access the generated mesh
-        }
-        else
-        {
-            Debug.LogError("GrassMesh component with generated mesh not found in the scene.");
-        }
-
-        // Setup args for instancing
-        args = new uint[5] { grassMesh.GetIndexCount(0), (uint)(grassPerCluster*grassPerCluster), grassMesh.GetIndexStart(0), grassMesh.GetBaseVertex(0), 0 };
-
-        // call command to populate field [aka populate allClusters array and populate args and position buffers for each cluster]
-        populateField();
-
-        Vector3 boundsCenter = new Vector3(0.0f, 0.0f, 0.0f);
-        // Define the size of the area that encompasses all your grass instances.
-        Vector3 boundsSize = new Vector3(fieldSize, 50.0f, fieldSize); // For example, 100 units wide, 50 units tall, 100 units deep.
-
-
-        bounds = new Bounds(boundsCenter, boundsCenter);
-
+        // Updates the position of the grass.
+        updateGrassBuffer();
     }
 
-    //function to initialise all clusters across the field 
-    void populateField()
-    {
-        allClusters = new GrassCluster[numClusters * numClusters];
+    // Updates the position of all grass clusters, sets up the grass materials for drawing.
+    void updateGrassBuffer() {
+        initializeGrassShader.SetInt("_Dimension", resolution);
+        initializeGrassShader.SetInt("_Scale", scale);
+        initializeGrassShader.SetBuffer(0, "_GrassDataBuffer", grassDataBuffer);
+        initializeGrassShader.Dispatch(0, Mathf.CeilToInt(resolution / 8.0f), Mathf.CeilToInt(resolution / 8.0f), 1);
 
-        for (int x = 0; x < numClusters; ++x)
-        {
-            for (int y = 0; y < numClusters; ++y)
-            {
-                allClusters[x + y * numClusters] = generateCluster(x, y);
-            }
-        }
+        // Setup args for graphics draw call.
+        uint[] args = new uint[5] { (uint)grassMesh.GetIndexCount(0), (uint)(grassDataBuffer.count), (uint)grassMesh.GetIndexStart(0), (uint)grassMesh.GetBaseVertex(0), 0 };
+        argsBuffer.SetData(args);
+
+        // Grass mesh 1: No rotation.
+        grassMaterial.SetBuffer("positionBuffer", grassDataBuffer);
+        grassMaterial.SetFloat("_Rotation", 0.0f);
+
+        // Grass mesh 2: Copy of grass mesh 1 with 50 degrees rotation.
+        grassMaterial2 = new Material(grassMaterial);
+        grassMaterial2.SetBuffer("positionBuffer", grassDataBuffer);
+        grassMaterial2.SetFloat("_Rotation", 50.0f);
+        
+        // Grass mesh 3: Copy of grass mesh 2 with -50 degrees rotation.
+        grassMaterial3 = new Material(grassMaterial);
+        grassMaterial3.SetBuffer("positionBuffer", grassDataBuffer);
+        grassMaterial3.SetFloat("_Rotation", -50.0f);
     }
 
-    GrassCluster generateCluster(int x, int y)
-    {
-        GrassCluster cluster = new GrassCluster { };
-        if (grassPerCluster > 0)
-        {
-            cluster.argsBuffer = new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
-            cluster.posBuffer = new ComputeBuffer(grassPerCluster*grassPerCluster, grassDataSize);
-            cluster.material = new Material(grassMaterial);
-
-            cluster.material.SetBuffer("_Positions", cluster.posBuffer);
-
-            cluster.argsBuffer.SetData(args);
-
-            // initialise custom shader to render each cluster
-            clusterShader.SetBuffer(0, "_posBuffer", cluster.posBuffer);
-            clusterShader.SetInt("x_offset", x*clusterSize);
-            clusterShader.SetInt("y_offset", y*clusterSize);
-
-            Debug.Log($"x_offset: {x*clusterSize}");
-            Debug.Log($"y_offset: {y*clusterSize}");
-            // dispatch shader 
-            // first arg: 0 [kernel number]
-            // second arg: numthreads[x,y,z]; this means we are dispatching the clustershader for each cluster to be number of grass objects in x axis x number of grass objects in y axis x 1 (2d grid of grass);
-            clusterShader.Dispatch(0, grassPerCluster, 1, grassPerCluster);
-
-
-            /***FOR DEBUGGING ***/
-            int bufferCount = grassPerCluster*grassPerCluster;
-            Vector3[] positions = new Vector3[bufferCount];
-            cluster.posBuffer.GetData(positions);
-
-            // Log the positions
-            for (int i = 0; i < positions.Length; i++)
-            {
-                Debug.Log($"Position {i}: {positions[i]}");
-            }
-            /*** ***/
-        }
-        else
-        {
-            Debug.LogError("grassPerCluster is zero, skipping cluster generation.");
-        }
-
-
-        return cluster;
-
-    }
-
-    // Update is called once per frame
+    // Update is called once per frame. Draws the grass clusters.
     void Update()
     {
-        Debug.LogError("update call");
-        Debug.LogError(numClusters);
-        for (int i = 0; i < numClusters * numClusters; i++)
-        {
-            Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allClusters[i].material, bounds, allClusters[i].argsBuffer);
-            // Debug.LogError("cluster rendered");
-        }
+        Graphics.DrawMeshInstancedIndirect(grassMesh, 0, grassMaterial, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), argsBuffer);
+        Graphics.DrawMeshInstancedIndirect(grassMesh, 0, grassMaterial2, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), argsBuffer);
+        Graphics.DrawMeshInstancedIndirect(grassMesh, 0, grassMaterial3, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), argsBuffer);
+    }
 
+    void OnDisable() 
+    {
+        grassDataBuffer.Release();
+        argsBuffer.Release();
+        grassDataBuffer = null;
+        argsBuffer = null;
     }
 }
