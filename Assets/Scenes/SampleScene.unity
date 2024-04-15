@@ -248,8 +248,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   grassMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
   grassMaterial: {fileID: 2100000, guid: a2339907c34ea405e82ea64d72c8ac40, type: 2}
-  resolution: 10
-  scale: 1
+  resolution: 100
+  scale: 2
 --- !u!4 &1743463509
 Transform:
   m_ObjectHideFlags: 0
@@ -276,6 +276,7 @@ GameObject:
   - component: {fileID: 1948916788}
   - component: {fileID: 1948916787}
   - component: {fileID: 1948916786}
+  - component: {fileID: 1948916789}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -342,10 +343,30 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1948916785}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1948916789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1948916785}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 384d18604b2f347a192c4b2625aef5ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  move_speed: 10
+  pan_sensitivity: 5
+  doubleTapThreshold: 0.5
+  controlCamera: {fileID: 0}
+  default_fov: 60
+  min_fov: 5
+  max_fov: 100
+  zoom_speed: 1000
