@@ -9,7 +9,7 @@ public class GrassInstantiator : MonoBehaviour
     public Material grassMaterial;
 
     // `resolution`: The length of the terrain on the x and z axis.
-    public int resolution = 100;
+    public int resolution = 1000;
 
     // `scale`: The number of grass clusters to render in each length unit.
     // Eg. If `resolution` = 100 and `scale` = 2, we render 200 grass clusters on the x and z axis each.
