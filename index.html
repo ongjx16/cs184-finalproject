@@ -1,0 +1,144 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <style>
+      body {
+        background-color: white;
+        padding: 100px;
+        width: 1000px;
+        margin: auto;
+        text-align: left;
+        font-weight: 300;
+        font-family: "Open Sans", sans-serif;
+        color: #121212;
+      }
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: "Source Sans Pro", sans-serif;
+      }
+      kbd {
+        color: #121212;
+      }
+    </style>
+    <title>CS 184 Path Tracer</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro"
+      rel="stylesheet"
+    />
+
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [
+            ["$", "$"],
+            ["\\(", "\\)"],
+          ],
+        },
+      };
+    </script>
+    <script
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+    ></script>
+  </head>
+
+  <body>
+    <h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2023</h1>
+    <h1 align="middle">
+      Final Project Checkpoint: Infinite Rendering of Grass with Realistic
+      Motion Simulation
+    </h1>
+    <h2 align="middle">
+      Chay Hui Xiang, Lim Sui Kiat, Marcus Yeo, Ong Jing Xuan
+    </h2>
+
+    <!-- Add Website URL -->
+    <h2 align="middle">Website URL: <a href="TO ADD">TO ADD</a></h2>
+    <h2 align="middle">Video URL: <a href="TO ADD">TO ADD</a></h2>
+    <h2 align="middle">Slides URL: <a href="https://docs.google.com/presentation/d/1zlFhJVaF020Wj4KuW7vMSL1E1Ni9-yL6i9VTcZSdvks/edit?usp=sharing">https://docs.google.com/presentation/d/1zlFhJVaF020Wj4KuW7vMSL1E1Ni9-yL6i9VTcZSdvks/edit?usp=sharing</a></h2>
+
+    <br />
+
+    <div>
+      <h2 align="middle">Overview of Project</h2>
+      <p>
+        Being interested in physical simulation in computer graphics,
+        particularly how video games simulate natural terrain, we decided to
+        base our project around a common terrain type: grass. Through simulating
+        how individual grass blades interact with each other in the presence of
+        wind and external forces, we hope to gain a better appreciation for game
+        development and the simulation of physics in computer graphics.
+      </p>
+      <br />
+
+      <h2 align="middle">Summary of Accomplishments</h2>
+      <h3>Implementation of Grass</h3>
+      <p>
+        We utilized 3 intersecting quads for the base unit of grass that we want
+        to replicate and use for our infinite grass. Using an initial texture,
+        we then propagated this image through GPU instancing to fill the terrain
+        with grass. We generate and compute grass positions using a compute
+        shader so that the grass positions are directly generated within the GPU
+        buffer. The result is as per seen in Figure 1 and 2 below.
+      </p>
+      <h3>Addition of Noise</h3>
+      <p>
+        Now that we are able to generate grass on the screen, our next step is
+        to make the grass look more natural. To do this, we want to add noise to
+        the xyz-axis in order to make the appearance of grass more random and
+        therefore, more natural. We achieve this using
+        <code>Simplex.compute</code> which provides 2D/3D gradient noise
+        functions. Through this, we are able to generate more realistic looking
+        grass as seen in Figure 3 and 4.
+      </p>
+      <div align="center">
+        <table style="width: 100%">
+          <tr align="center">
+            <td>
+              <img src="images/original.jpg" align="middle" width="500px" />
+              <figcaption>Figure 1: Initial Grass implementation</figcaption>
+            </td>
+            <td>
+              <img src="images/nonoise.png" align="middle" width="500px" />
+              <figcaption>
+                Figure 2: Populated Implementation of Grass
+              </figcaption>
+            </td>
+          </tr>
+          <tr align="center">
+            <td>
+              <img src="images/xnoise.png" align="middle" width="500px" />
+              <figcaption>Figure 3: Noise implemented in xz-axis</figcaption>
+            </td>
+            <td>
+              <img src="images/ynoise.png" align="middle" width="500px" />
+              <figcaption>Figure 4: Noise implemented in y-axis</figcaption>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <br />
+
+      <h2 align="middle">Progress Relative to Plan</h2>
+      <p>
+        In accordance with the work plan, we have managed to make significant
+        progress in achieving 2 of our delivery goals thus far: to make the
+        grass look natural and to make the grass look sufficiently populated.
+      </p>
+
+      <h2 align="middle">Updates to Work Plan</h2>
+      <p>
+        Currently, we are working on the implementation of adding motions to
+        physical stimuli like wind speeds and direction to create a more natural
+        feel to the grass, as well as researching on optimal rendering methods
+        to make our implementation as robust as possible. This is on schedule
+        with the initial work plan proposed.
+      </p>
+    </div>
+  </body>
+</html>
