@@ -5,6 +5,7 @@ Shader "Unlit/GrassPNG" {
 
     SubShader {
         Zwrite On
+        Cull Off
 
         Pass {
             CGPROGRAM
