@@ -9,7 +9,7 @@ struct GrassData {
 };
 
 RWStructuredBuffer<GrassData> _GrassDataBuffer;
-int _Dimension, _Scale;
+int _Dimension, _Scale, x_offset, y_offset;
 
 [numthreads(8,8,1)]
 void clusterCompute(uint3 id : SV_DispatchThreadID) {
@@ -24,6 +24,8 @@ void clusterCompute(uint3 id : SV_DispatchThreadID) {
 
         // Determine xz coordinates of grass cluster.
         pos.xz = (id.xy - float(_Dimension) * 0.5) * (1.0f / float(_Scale));
+        pos.x += x_offset/2;
+        pos.z += y_offset/2;
 
         pos.x += snoise(float3(pos.xz, 0.0f) * 3.0f) * 0.2f;
         pos.z += snoise(float3(pos.xz, 0.0f) * 4.0f) * 0.2f;
