@@ -8,22 +8,18 @@ public class GrassInstantiator : MonoBehaviour
     public Mesh grassMesh;
     public Material grassMaterial;
 
-    //`fieldSize` : length of one side of the field
+    // `fieldSize`: length of one side of the field.
     public int fieldSize = 100;
-    // `numChunks`: The number of chunks to render in each length unit.
+    // `numChunks`: The number of chunks to render along each axis. (Eg. `numChunks` = 10 means that there will be 10 chunks along the x and z axis.)
     public int numChunks = 10;
 
     // `scale`: The number of grass clusters to render in each length unit.
     // Eg. If `resolution` = 10 and `scale` = 2, we render 20 grass clusters on the x and z axis of a chunk each. (i.e. 20x20 clusters rendered in one chunk)
     public int scale = 1;
 
-
     // -- Private variables to be assigned in code. --
-    // `resolution`: The length of the chunk on the x and z axis. equal to fieldSize/numChunks
+    // `resolution`: The length of the chunk on the x and z axis. equal to `fieldSize / numChunks`.
     private int resolution;
-
-    // `grassMaterial2`, `grassMaterial3`: Rotated grass image. Together with `grassMaterial`, these 3 grass images form the complete grass cluster. 
-    private Material grassMaterial2, grassMaterial3;
 
     // `initializeGrassShader`: The compute shader script found in `Resources/clusterCompute.compute`. Runs on the GPU.
     private ComputeShader initializeGrassShader;
@@ -34,16 +30,20 @@ public class GrassInstantiator : MonoBehaviour
     {
         public Vector4 position;
     }
+
     // `GrassChunk`: Data for each grass chunk.
-    // A grass chunk consists of (resolution x scale)^2 number of GrassClusters.
+    // A grass chunk consists of (resolution x scale)^2 number of `GrassClusters`.
     private struct GrassChunk
     {
-        // `argsBuffer`: Buffer of indirect arguments to be used later on in in Graphics.DrawMeshInstancedIndirect to render the mesh with positions from the pos buffer.
+        // `argsBuffer`: Buffer of indirect arguments to be used later on in in `Graphics.DrawMeshInstancedIndirect` to render the mesh with positions from the pos buffer.
         public ComputeBuffer argsBuffer;
         // `posBuffer`: Buffer / Array of all positions of grass clusters in the chunk
         public ComputeBuffer posBuffer;
+        // `grassMaterial`: Non-rotated grass mesh.
         public Material grassMaterial;
+        // `grassMaterial2`: Grass mesh rotated by 50 degrees.
         public Material grassMaterial2;
+        // `grassMaterial3`: Grass mesh rotated by -50 degrees.
         public Material grassMaterial3;
     }
 
@@ -60,15 +60,6 @@ public class GrassInstantiator : MonoBehaviour
         {
             Debug.LogError("compute shader not found");
         }
-        // sets up the grass materials for drawing
-        // Grass mesh 2: Copy of grass mesh 1 with 50 degrees rotation.
-        grassMaterial2 = new Material(grassMaterial);
-        grassMaterial2.SetFloat("_Rotation", 50.0f);
-
-        // Grass mesh 3: Copy of grass mesh 2 with -50 degrees rotation.
-        grassMaterial3 = new Material(grassMaterial);
-        grassMaterial3.SetFloat("_Rotation", -50.0f);
-
 
         // Updates the position of the grass.
         populateField();
@@ -109,13 +100,14 @@ public class GrassInstantiator : MonoBehaviour
         chunk.grassMaterial.SetBuffer("positionBuffer", chunk.posBuffer);
 
         // Grass mesh 2: Copy of grass mesh 1 with 50 degrees rotation.
-        chunk.grassMaterial2 = new Material(grassMaterial2);
+        chunk.grassMaterial2 = new Material(grassMaterial);
+        chunk.grassMaterial2.SetFloat("_Rotation", 50.0f);
         chunk.grassMaterial2.SetBuffer("positionBuffer", chunk.posBuffer);
 
         // Grass mesh 3: Copy of grass mesh 2 with -50 degrees rotation.
-        chunk.grassMaterial3 = new Material(grassMaterial3);
+        chunk.grassMaterial3 = new Material(grassMaterial);
+        chunk.grassMaterial3.SetFloat("_Rotation", -50.0f);
         chunk.grassMaterial3.SetBuffer("positionBuffer", chunk.posBuffer);
-
 
         return chunk;
     }
