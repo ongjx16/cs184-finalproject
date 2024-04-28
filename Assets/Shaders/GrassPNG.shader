@@ -89,7 +89,7 @@ Shader "Unlit/GrassPNG" {
 
                 float luminance = LinearRgbToLuminance(col);
 
-                float saturation = lerp(1.0f, i.saturationLevel, i.uv.y * i.uv.y * i.uv.y);
+                float saturation = lerp(0.7f, i.saturationLevel, i.uv.y * i.uv.y * i.uv.y);
                 col.r /= saturation;
                 
              
