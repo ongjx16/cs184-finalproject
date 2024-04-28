@@ -8,7 +8,7 @@ public class GrassInstantiator : MonoBehaviour
     public Mesh grassMesh;
     public Material grassMaterial;
 
-    // `fieldSize`: length of one side of the field.
+    // `fieldSize`: The length of one side of the field.
     public int fieldSize = 100;
     // `numChunks`: The number of chunks to render along each axis. (Eg. `numChunks` = 10 means that there will be 10 chunks along the x and z axis.)
     public int numChunks = 10;
@@ -104,7 +104,7 @@ public class GrassInstantiator : MonoBehaviour
         chunk.grassMaterial2.SetFloat("_Rotation", 50.0f);
         chunk.grassMaterial2.SetBuffer("positionBuffer", chunk.posBuffer);
 
-        // Grass mesh 3: Copy of grass mesh 2 with -50 degrees rotation.
+        // Grass mesh 3: Copy of grass mesh 1 with -50 degrees rotation.
         chunk.grassMaterial3 = new Material(grassMaterial);
         chunk.grassMaterial3.SetFloat("_Rotation", -50.0f);
         chunk.grassMaterial3.SetBuffer("positionBuffer", chunk.posBuffer);
@@ -133,6 +133,9 @@ public class GrassInstantiator : MonoBehaviour
             allChunks[i].argsBuffer.Release();
             allChunks[i].posBuffer = null;
             allChunks[i].argsBuffer = null;
+            allChunks[i].grassMaterial = null;
+            allChunks[i].grassMaterial2 = null;
+            allChunks[i].grassMaterial3 = null;
         }
 
     }
