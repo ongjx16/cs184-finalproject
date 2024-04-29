@@ -55,12 +55,6 @@ public class GrassInstantiator : MonoBehaviour
     private ComputeBuffer voteBuffer, scanBuffer, groupSumArrayBuffer, scannedGroupSumBuffer;
 
     GrassChunk[] allChunks;
-
-    // [Range(0, 1000.0f)]
-    // public float lodCutoff = 1000.0f;
-
-    // [Range(0, 1000.0f)]
-    // public float distanceCutoff = 1000.0f;
     uint[] args;
 
     // Start is called before the first frame update.
@@ -88,35 +82,6 @@ public class GrassInstantiator : MonoBehaviour
         {
             Debug.LogError("cull grass compute shader not found");
         }
-
-        // numInstancesPerChunk = resolution * resolution;
-        // numVoteThreadGroups = Mathf.CeilToInt(numInstancesPerChunk / 128.0f);
-        // numGroupScanThreadGroups = Mathf.CeilToInt(numInstancesPerChunk / 1024.0f);
-
-        // numThreadGroups = Mathf.CeilToInt(numInstancesPerChunk / 128.0f);
-        // if (numThreadGroups > 128)
-        // {
-        //     int powerOfTwo = 128;
-        //     while (powerOfTwo < numThreadGroups)
-        //         powerOfTwo *= 2;
-
-        //     numThreadGroups = powerOfTwo;
-        // }
-        // else
-        // {
-        //     while (128 % numThreadGroups != 0)
-        //         numThreadGroups++;
-        // }
-        // args = new uint[5] { 0, 0, 0, 0, 0 };
-        // args[0] = (uint)grassMesh.GetIndexCount(0);
-        // args[1] = (uint)0;
-        // args[2] = (uint)grassMesh.GetIndexStart(0);
-        // args[3] = (uint)grassMesh.GetBaseVertex(0);
-
-        // voteBuffer = new ComputeBuffer(numInstancesPerChunk, 4);
-        // scanBuffer = new ComputeBuffer(numInstancesPerChunk, 4);
-        // groupSumArrayBuffer = new ComputeBuffer(numThreadGroups, 4);
-        // scannedGroupSumBuffer = new ComputeBuffer(numThreadGroups, 4);
 
         // Updates the position of the grass.
         populateField();
@@ -157,8 +122,6 @@ public class GrassInstantiator : MonoBehaviour
         uint[] args = new uint[5] { (uint)grassMesh.GetIndexCount(0), (uint)(chunk.posBuffer.count), (uint)grassMesh.GetIndexStart(0), (uint)grassMesh.GetBaseVertex(0), 0 };
         chunk.argsBuffer.SetData(args);
 
-
-
         // Grass mesh 1: No rotation.
         chunk.grassMaterial = new Material(grassMaterial);
         chunk.grassMaterial.SetBuffer("positionBuffer", chunk.posBuffer);
@@ -173,133 +136,21 @@ public class GrassInstantiator : MonoBehaviour
         chunk.grassMaterial3.SetFloat("_Rotation", -50.0f);
         chunk.grassMaterial3.SetBuffer("positionBuffer", chunk.posBuffer);
 
-        Vector3 c = new Vector3(0.0f, 0.0f, 0.0f);
-
-        c.y = 0.0f;
-        c.x = -(chunkDim * 0.5f * numChunks) + chunkDim * xOffset;
-        c.z = -(chunkDim * 0.5f * numChunks) + chunkDim * yOffset;
-        c.x += chunkDim * 0.5f;
-        c.z += chunkDim * 0.5f;
-
-        chunk.bounds = new Bounds(c, new Vector3(-chunkDim, 10.0f, chunkDim));
-
         return chunk;
     }
 
-    // void CullGrass(GrassChunk chunk, Matrix4x4 VP, bool noLOD)
-    // {
-    //     //Reset Args
-    //     if (noLOD)
-    //         if (chunk.argsBuffer == null)
-    //             Debug.LogError("chunk.argsBuffer is null");
-    //         else
-    //             chunk.argsBuffer.SetData(args);
-    //     else
-    //     {
-    //         if (chunk.argsBufferLOD == null)
-    //             Debug.LogError("chunk.argsBufferLOD is null");
-    //         else
-    //             chunk.argsBufferLOD.SetData(args);
-    //     };
-
-
-    //     // Vote
-    //     cullGrassShader.SetMatrix("MATRIX_VP", VP);
-    //     cullGrassShader.SetBuffer(0, "_GrassDataBuffer", chunk.posBuffer);
-    //     cullGrassShader.SetBuffer(0, "_VoteBuffer", voteBuffer);
-    //     cullGrassShader.SetVector("_CameraPosition", Camera.main.transform.position);
-    //     cullGrassShader.SetFloat("_Distance", distanceCutoff);
-    //     cullGrassShader.Dispatch(0, numVoteThreadGroups, 1, 1);
-
-    //     // Scan Instances
-    //     cullGrassShader.SetBuffer(1, "_VoteBuffer", voteBuffer);
-    //     cullGrassShader.SetBuffer(1, "_ScanBuffer", scanBuffer);
-    //     cullGrassShader.SetBuffer(1, "_GroupSumArray", groupSumArrayBuffer);
-    //     cullGrassShader.Dispatch(1, numThreadGroups, 1, 1);
-
-    //     // Scan Groups
-    //     cullGrassShader.SetInt("_NumOfGroups", numThreadGroups);
-    //     cullGrassShader.SetBuffer(2, "_GroupSumArrayIn", groupSumArrayBuffer);
-    //     cullGrassShader.SetBuffer(2, "_GroupSumArrayOut", scannedGroupSumBuffer);
-    //     cullGrassShader.Dispatch(2, numGroupScanThreadGroups, 1, 1);
-
-    //     // Compact
-    //     cullGrassShader.SetBuffer(3, "_GrassDataBuffer", chunk.posBuffer);
-    //     cullGrassShader.SetBuffer(3, "_VoteBuffer", voteBuffer);
-    //     cullGrassShader.SetBuffer(3, "_ScanBuffer", scanBuffer);
-    //     cullGrassShader.SetBuffer(3, "_ArgsBuffer", noLOD ? chunk.argsBuffer : chunk.argsBufferLOD);
-    //     cullGrassShader.SetBuffer(3, "_CulledGrassOutputBuffer", chunk.culledposBuffer);
-    //     cullGrassShader.SetBuffer(3, "_GroupSumArray", scannedGroupSumBuffer);
-    //     cullGrassShader.Dispatch(3, numThreadGroups, 1, 1);
-    // }
 
     // Update is called once per frame. Draws the grass clusters.
     void Update()
     {
-        // Matrix4x4 P = Camera.main.projectionMatrix;
-        // Matrix4x4 V = Camera.main.transform.worldToLocalMatrix;
-        // Matrix4x4 VP = P * V;
-
-
-        // if (voteBuffer == null)
-        // {
-        //     Debug.LogError($"voteBuffer is null.");
-        // }
-        // if (scanBuffer == null)
-        // {
-        //     Debug.LogError($"scanBuffer is null.");
-        // }
-        // if (groupSumArrayBuffer == null)
-        // {
-        //     Debug.LogError($"groupSumArrayBuffer is null.");
-        // }
-        // if (scannedGroupSumBuffer == null)
-        // {
-        //     Debug.LogError($"scannedGroupSumBuffer is null.");
-        // }
-
 
         // render by chunk
         for (int i = 0; i < numChunks * numChunks; i++)
         {
-            // if (allChunks[i].posBuffer == null)
-            // {
-            //     Debug.LogError($"allChunks[i].posBuffer is null.");
-            // }
-            // if (allChunks[i].argsBuffer == null)
-            // {
-            //     Debug.LogError($"allChunks[i].argsBuffer is null.");
-            // }
-
-            // float dist = Vector3.Distance(Camera.main.transform.position, allChunks[i].bounds.center);
-
-            // bool noLOD = dist < lodCutoff;
-            // // bool noLOD = true;
-
-            // CullGrass(allChunks[i], VP, noLOD);
-
-            // if (noLOD)
-            // {
+           
             Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
             Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial2, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
             Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial3, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
-            // }
-            // else
-            // {
-            //     if (allChunks[i].argsBufferLOD != null)
-            //     {
-            //         Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBufferLOD);
-            //         Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial2, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBufferLOD);
-            //         Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial3, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBufferLOD);
-            //     }
-            //     else
-            //     {
-            //         Debug.LogError("argsBufferLOD is null for chunk " + i);
-            //     }
-
-
-            // }
-
         }
 
     }
