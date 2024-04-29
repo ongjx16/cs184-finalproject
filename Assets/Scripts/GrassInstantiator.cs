@@ -56,6 +56,12 @@ public class GrassInstantiator : MonoBehaviour
 
     GrassChunk[] allChunks;
     uint[] args;
+    
+    //allows for fieldSize variable to be accessible for ground terrain mapping
+    public int GetFieldSize()
+    {
+        return fieldSize/numChunks;
+    }
 
     // Start is called before the first frame update.
     // Sets up the necessary variables before drawing.
@@ -85,6 +91,7 @@ public class GrassInstantiator : MonoBehaviour
 
         // Updates the position of the grass.
         populateField();
+
     }
     void populateField()
     {
@@ -152,7 +159,6 @@ public class GrassInstantiator : MonoBehaviour
             Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial2, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
             Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial3, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
         }
-
     }
 
     void OnDisable()

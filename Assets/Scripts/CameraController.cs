@@ -6,6 +6,7 @@ public class CameraController : MonoBehaviour
 {
     public float move_speed = 10.0f;
     public float pan_sensitivity = 5.0f;
+    public float minHeight = 2.0f; // Minimum height above ground
     private bool isWaitingForSecondTap = false;
     private float timeOfLastTap = 0;
     private bool fly = false;
@@ -18,7 +19,6 @@ public class CameraController : MonoBehaviour
     private Vector3 originalPosition;
     private Quaternion originalRotation;
 
-    // Start is called before the first frame update
     void Start()
     {
         Debug.Log("Camera control is activated!");
@@ -35,39 +35,18 @@ public class CameraController : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
     void Update()
     {
-        //Left and right movement of camera depending on where the camera is facing using WASD or arrow keys
-        transform.position += verticalMovement();
-        transform.position += horizontalMovement();
+        Vector3 proposedPosition = transform.position + verticalMovement() + horizontalMovement();
 
-        //Allows for desecent in world y axis regardless of where the camera is facing
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            transform.position -= worldYMovement();
+            proposedPosition -= worldYMovement();
         }
 
-        //Doubletap spacebar to fly vertically upward
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (!isWaitingForSecondTap)
-            {
-                timeOfLastTap = Time.time;
-                isWaitingForSecondTap = true;
-            }
-            else if (isWaitingForSecondTap && Time.time - timeOfLastTap <= doubleTapThreshold)
-            {
-                fly = true;
-            }
-            else
-            {
-                timeOfLastTap = Time.time;
-            }
-        }
-        if (isWaitingForSecondTap && (Time.time - timeOfLastTap > doubleTapThreshold))
-        {
-            isWaitingForSecondTap = false;
+            handleSpacePress();
         }
 
         if (Input.GetKeyUp(KeyCode.Space))
@@ -76,27 +55,16 @@ public class CameraController : MonoBehaviour
         }
         if (Input.GetKey(KeyCode.Space) && fly)
         {
-            transform.position += worldYMovement();
+            proposedPosition += worldYMovement();
         }
 
-        // Camera Panning if left mousebutton is clicked down
         if (Input.GetMouseButton(0))
         {
             transform.eulerAngles += panCamera();
         }
 
-        //Change FOV using scroll wheel
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (scroll > 0f)
-        {
-            controlCamera.fieldOfView = Mathf.Max(controlCamera.fieldOfView - zoom_speed * Time.deltaTime, min_fov);
-        }
-        else if (scroll < 0f)
-        {
-            controlCamera.fieldOfView = Mathf.Min(controlCamera.fieldOfView + zoom_speed * Time.deltaTime, max_fov);
-        }
+        handleScroll();
 
-        //Change Roll of camera
         if (Input.GetKey(KeyCode.Q))
         {
             transform.eulerAngles += new Vector3(0, 0, -0.05f * pan_sensitivity);
@@ -110,13 +78,60 @@ public class CameraController : MonoBehaviour
             transform.eulerAngles = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, 0);
         }
 
-        //Reset to original camera position
         if (Input.GetKeyDown(KeyCode.R))
         {
-            transform.position = originalPosition;
-            transform.rotation = originalRotation;
+            resetCameraPosition();
+        }
+
+        // Enforce minHeight constraint
+        if (proposedPosition.y < minHeight)
+        {
+            proposedPosition.y = minHeight;
+        }
+
+        transform.position = proposedPosition;
+    }
+
+    void handleSpacePress()
+    {
+        if (!isWaitingForSecondTap)
+        {
+            timeOfLastTap = Time.time;
+            isWaitingForSecondTap = true;
+        }
+        else if (isWaitingForSecondTap && Time.time - timeOfLastTap <= doubleTapThreshold)
+        {
+            fly = true;
+        }
+        else
+        {
+            timeOfLastTap = Time.time;
+        }
+        if (isWaitingForSecondTap && (Time.time - timeOfLastTap > doubleTapThreshold))
+        {
+            isWaitingForSecondTap = false;
         }
     }
+
+    void handleScroll()
+    {
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if (scroll > 0f)
+        {
+            controlCamera.fieldOfView = Mathf.Max(controlCamera.fieldOfView - zoom_speed * Time.deltaTime, min_fov);
+        }
+        else if (scroll < 0f)
+        {
+            controlCamera.fieldOfView = Mathf.Min(controlCamera.fieldOfView + zoom_speed * Time.deltaTime, max_fov);
+        }
+    }
+
+    void resetCameraPosition()
+    {
+        transform.position = originalPosition;
+        transform.rotation = originalRotation;
+    }
+
     Vector3 verticalMovement()
     {
         return transform.forward * Input.GetAxis("Vertical") * move_speed * Time.deltaTime;
