@@ -68,12 +68,20 @@ public class GrassInstantiator : MonoBehaviour
     void Start()
     {
         resolution = fieldSize / numChunks;
+
         initializeGrassShader = Resources.Load<ComputeShader>("clusterCompute");
         if (initializeGrassShader == null)
         {
             Debug.LogError("compute shader not found");
         }
         resolution *= scale;
+
+        // Access the camera component
+        Camera cam = Camera.main; // Adjust this if you're not using the main camera
+
+        // Increase the field of view to broaden the visible area
+        cam.fieldOfView += 10.0f; // Increase by 5 degrees, adjust as necessary
+
 
         cullGrassShader = Resources.Load<ComputeShader>("CullGrass");
         if (cullGrassShader == null)
@@ -250,6 +258,7 @@ public class GrassInstantiator : MonoBehaviour
         //     Debug.LogError($"scannedGroupSumBuffer is null.");
         // }
 
+
         // render by chunk
         for (int i = 0; i < numChunks * numChunks; i++)
         {
@@ -271,9 +280,9 @@ public class GrassInstantiator : MonoBehaviour
 
             // if (noLOD)
             // {
-                Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
-                Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial2, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
-                Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial3, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
+            Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
+            Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial2, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
+            Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial3, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
             // }
             // else
             // {
@@ -317,4 +326,6 @@ public class GrassInstantiator : MonoBehaviour
         scannedGroupSumBuffer = null;
 
     }
+
+
 }
