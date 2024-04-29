@@ -7,6 +7,7 @@ public class GrassInstantiator : MonoBehaviour
     // -- Public variables to be assigned in unity editor. --
     public Mesh grassMesh;
     public Material grassMaterial;
+    public GameObject groundPlane;
 
     // `fieldSize`: The length of one side of the field.
     public int fieldSize = 100;
@@ -88,10 +89,21 @@ public class GrassInstantiator : MonoBehaviour
         {
             Debug.LogError("cull grass compute shader not found");
         }
-
+        SetupGroundPlane();
         // Updates the position of the grass.
         populateField();
 
+    }
+    void SetupGroundPlane()
+    {
+        // Set plane size to match the grass field
+        float planeScale = fieldSize / 10.0f;  // Unity default plane is 10x10 units
+        groundPlane.transform.localScale = new Vector3(planeScale/1.5f, 1, planeScale/1.5f);
+        groundPlane.transform.position = new Vector3(2*planeScale, 0, 2*planeScale);  // Center the plane and set slightly below grass
+
+        // Adjust texture tiling
+        Material groundMaterial = groundPlane.GetComponent<Renderer>().material;
+        groundMaterial.mainTextureScale = new Vector2(numChunks, numChunks);  // This will tile the texture across the whole plane uniformly
     }
     void populateField()
     {
