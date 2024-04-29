@@ -22,7 +22,7 @@ public class GrassInstantiator : MonoBehaviour
     private int resolution;
 
     // `initializeGrassShader`: The compute shader script found in `Resources/clusterCompute.compute`. Runs on the GPU.
-    private ComputeShader initializeGrassShader;
+    private ComputeShader initializeGrassShader, cullGrassShader;
 
     // `GrassCluster`: Data for each grass cluster.
     // A grass cluster consists of 3 meshes of grass images placed in a asterisk (*)-like arrangement.
@@ -45,20 +45,42 @@ public class GrassInstantiator : MonoBehaviour
         public Material grassMaterial2;
         // `grassMaterial3`: Grass mesh rotated by -50 degrees.
         public Material grassMaterial3;
+
+        public ComputeBuffer argsBufferLOD;
+        public ComputeBuffer culledposBuffer;
+        public Bounds bounds;
+
     }
+    private int numVoteThreadGroups, numGroupScanThreadGroups, numInstancesPerChunk, numThreadGroups;
+    private ComputeBuffer voteBuffer, scanBuffer, groupSumArrayBuffer, scannedGroupSumBuffer;
 
     GrassChunk[] allChunks;
+    uint[] args;
 
     // Start is called before the first frame update.
     // Sets up the necessary variables before drawing.
     void Start()
     {
         resolution = fieldSize / numChunks;
+
         initializeGrassShader = Resources.Load<ComputeShader>("clusterCompute");
-        resolution *= scale;
         if (initializeGrassShader == null)
         {
             Debug.LogError("compute shader not found");
+        }
+        resolution *= scale;
+
+        // Access the camera component
+        Camera cam = Camera.main; // Adjust this if you're not using the main camera
+
+        // Increase the field of view to broaden the visible area
+        cam.fieldOfView += 10.0f; // Increase by 5 degrees, adjust as necessary
+
+
+        cullGrassShader = Resources.Load<ComputeShader>("CullGrass");
+        if (cullGrassShader == null)
+        {
+            Debug.LogError("cull grass compute shader not found");
         }
 
         // Updates the position of the grass.
@@ -82,12 +104,17 @@ public class GrassInstantiator : MonoBehaviour
     {
         GrassChunk chunk = new GrassChunk { };
         chunk.posBuffer = new ComputeBuffer(resolution * resolution, 4 * 4);
+        chunk.culledposBuffer = new ComputeBuffer(resolution * resolution, 4 * 4);
         chunk.argsBuffer = new ComputeBuffer(1, 5 * sizeof(int), ComputeBufferType.IndirectArguments);
+        chunk.argsBufferLOD = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
+        int chunkDim = resolution;
+        int xOffset = x * resolution / 4;
+        int yOffset = y * resolution / 4;
 
         initializeGrassShader.SetInt("_Dimension", resolution);
         initializeGrassShader.SetInt("_Scale", scale);
-        initializeGrassShader.SetInt("x_offset", x * resolution);
-        initializeGrassShader.SetInt("y_offset", y * resolution);
+        initializeGrassShader.SetInt("x_offset", xOffset);
+        initializeGrassShader.SetInt("y_offset", yOffset);
         initializeGrassShader.SetBuffer(0, "_GrassDataBuffer", chunk.posBuffer);
         initializeGrassShader.Dispatch(0, Mathf.CeilToInt(resolution / 8.0f), Mathf.CeilToInt(resolution / 8.0f), 1);
 
@@ -112,12 +139,15 @@ public class GrassInstantiator : MonoBehaviour
         return chunk;
     }
 
+
     // Update is called once per frame. Draws the grass clusters.
     void Update()
     {
+
         // render by chunk
         for (int i = 0; i < numChunks * numChunks; i++)
         {
+           
             Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
             Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial2, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
             Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial3, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
@@ -137,6 +167,16 @@ public class GrassInstantiator : MonoBehaviour
             allChunks[i].grassMaterial2 = null;
             allChunks[i].grassMaterial3 = null;
         }
+        voteBuffer.Release();
+        voteBuffer = null;
+        scanBuffer.Release();
+        scanBuffer = null;
+        groupSumArrayBuffer.Release();
+        groupSumArrayBuffer = null;
+        scannedGroupSumBuffer.Release();
+        scannedGroupSumBuffer = null;
 
     }
+
+
 }

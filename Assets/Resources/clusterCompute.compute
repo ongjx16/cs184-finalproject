@@ -24,8 +24,8 @@ void clusterCompute(uint3 id : SV_DispatchThreadID) {
 
         // Determine xz coordinates of grass cluster.
         pos.xz = (id.xy - float(_Dimension) * 0.5) * (1.0f / float(_Scale));
-        pos.x += x_offset/2;
-        pos.z += y_offset/2;
+        pos.x += x_offset;
+        pos.z += y_offset;
 
         pos.x += snoise(float3(pos.xz, 0.0f) * 3.0f) * 0.2f;
         pos.z += snoise(float3(pos.xz, 0.0f) * 4.0f) * 0.2f;
