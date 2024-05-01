@@ -147,9 +147,6 @@ public class GrassInstantiator : MonoBehaviour
         for (int x = 0; x < numChunks; ++x) {
             for (int y = 0; y < numChunks; ++y) {
                 allChunks[x + y * numChunks] = createChunk(x, y);
-                Vector3 center = new Vector3(x*baseResolution + baseResolution/2.0f, 0, y*baseResolution + baseResolution/2.0f);
-                Vector3 size = new Vector3(baseResolution, 0, baseResolution);
-                allChunks[x + y * numChunks].bounds = new Bounds(center, size);
             }
         }
     }
@@ -163,8 +160,11 @@ public class GrassInstantiator : MonoBehaviour
         chunk.argsBuffer = new ComputeBuffer(1, 5 * sizeof(int), ComputeBufferType.IndirectArguments);
         chunk.argsBufferLOD = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
         int chunkDim = resolution;
-        int xOffset = x * resolution / 4;
-        int yOffset = y * resolution / 4;
+        int xOffset = (x * resolution)/ (2*scale);
+        int yOffset = (y * resolution) / (2*scale);
+        Vector3 midpt = new Vector3(xOffset, 0, yOffset);
+        Vector3 size = new Vector3(resolution/scale, 0, resolution/scale);
+        chunk.bounds = new Bounds(midpt, size);
 
         initializeGrassShader.SetInt("_Dimension", resolution);
         initializeGrassShader.SetInt("_Scale", scale);

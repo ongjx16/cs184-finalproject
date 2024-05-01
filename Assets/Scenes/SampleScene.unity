@@ -347,7 +347,7 @@ MonoBehaviour:
   grassMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
   grassMaterial: {fileID: 2100000, guid: a2339907c34ea405e82ea64d72c8ac40, type: 2}
   groundPlane: {fileID: 83283689}
-  customRenderDistance: 10
+  customRenderDistance: 20
   fieldSize: 100
   numChunks: 10
   scale: 2
@@ -417,7 +417,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.01
-  far clip plane: 200
+  far clip plane: 100
   field of view: 60
   orthographic: 0
   orthographic size: 5
