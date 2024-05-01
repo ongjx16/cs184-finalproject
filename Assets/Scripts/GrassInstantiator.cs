@@ -115,31 +115,6 @@ public class GrassInstantiator : MonoBehaviour
         groundMaterial.mainTextureScale = new Vector2(numChunks, numChunks);  // This will tile the texture across the whole plane uniformly
     }
 
-    // void populateField()
-    // {
-    //     allChunks = new GrassChunk[numChunks * numChunks];
-
-    //     for (int x = 0; x < numChunks; ++x)
-    //     {
-    //         for (int y = 0; y < numChunks; ++y)
-    //         {
-    //             allChunks[x + y * numChunks] = createChunk(x, y);
-    //         }
-    //     }
-    // }
-    // void populateField() {
-    //     allChunks = new GrassChunk[numChunks * numChunks];
-
-    //     for (int x = 0; x < numChunks; ++x) {
-    //         for (int y = 0; y < numChunks; ++y) {
-    //             allChunks[x + y * numChunks] = createChunk(x, y);
-    //             // Calculate and store the bounds for each chunk
-    //             Vector3 center = new Vector3(x + resolution/2.0f, 0, y + resolution/2.0f);
-    //             Vector3 size = new Vector3(resolution, 0, resolution);
-    //             allChunks[x + y * numChunks].bounds = new Bounds(center, size);
-    //         }
-    //     }
-    // }
     void populateField() {
         allChunks = new GrassChunk[numChunks * numChunks];
         int baseResolution = fieldSize / numChunks; // Base resolution for each chunk
@@ -194,20 +169,6 @@ public class GrassInstantiator : MonoBehaviour
         return chunk;
     }
 
-
-    // Update is called once per frame. Draws the grass clusters.
-    // void Update()
-    // {
-
-    //     // render by chunk
-    //     for (int i = 0; i < numChunks * numChunks; i++)
-    //     {
-           
-    //         Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
-    //         Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial2, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
-    //         Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial3, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
-    //     }
-    // }
     void Update() {
         UpdateCameraFrustum();  // Update the camera frustum each frame
         Vector3 cameraPosition = cam.transform.position;

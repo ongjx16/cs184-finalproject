@@ -112,7 +112,7 @@ Shader "Unlit/GrassPNG" {
         _MainTex ("Texture", 2D) = "white" {}
         _WindStrength ("Wind Strength", Range(0.5, 50.0)) = 1
         _CullingBias ("Cull Bias", Range(0.1, 1.0)) = 1.0
-        _LODCutoff ("LOD Cutoff", Range(10.0, 500.0)) = 100
+        _LODCutoff ("LOD Cutoff", Range(10.0, 500.0)) = 10
     }
 
     SubShader {
