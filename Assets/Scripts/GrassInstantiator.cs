@@ -59,7 +59,7 @@ public class GrassInstantiator : MonoBehaviour
         public Material grassMaterial3;
 
         public ComputeBuffer argsBufferLOD;
-        public ComputeBuffer culledposBuffer;
+        public ComputeBuffer culledPosBuffer;
         public Bounds bounds;
     }
     private int numVoteThreadGroups, numGroupScanThreadGroups, numInstancesPerChunk, numThreadGroups;
@@ -131,7 +131,7 @@ public class GrassInstantiator : MonoBehaviour
     {
         GrassChunk chunk = new GrassChunk { };
         chunk.posBuffer = new ComputeBuffer(resolution * resolution, 4 * 4);
-        chunk.culledposBuffer = new ComputeBuffer(resolution * resolution, 4 * 4);
+        chunk.culledPosBuffer = new ComputeBuffer(resolution * resolution, 4 * 4);
         chunk.argsBuffer = new ComputeBuffer(1, 5 * sizeof(int), ComputeBufferType.IndirectArguments);
         chunk.argsBufferLOD = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
         int chunkDim = resolution;
@@ -175,9 +175,9 @@ public class GrassInstantiator : MonoBehaviour
         
         for (int i = 0; i < numChunks * numChunks; i++) {
             float distance = Vector3.Distance(allChunks[i].bounds.center, cameraPosition);
-            if (GeometryUtility.TestPlanesAABB(cameraFrustumPlanes, allChunks[i].bounds) && distance <= customRenderDistance) {
+            // if (GeometryUtility.TestPlanesAABB(cameraFrustumPlanes, allChunks[i].bounds) && distance <= customRenderDistance) {
                 DrawGrassChunk(allChunks[i]);
-            }
+            // }
         }
     }
 
@@ -194,12 +194,18 @@ public class GrassInstantiator : MonoBehaviour
         {
             allChunks[i].posBuffer.Release();
             allChunks[i].argsBuffer.Release();
+            allChunks[i].argsBufferLOD.Release();
+            allChunks[i].culledPosBuffer.Release();
             allChunks[i].posBuffer = null;
             allChunks[i].argsBuffer = null;
+            allChunks[i].culledPosBuffer = null;
+            allChunks[i].argsBufferLOD = null;
+
             allChunks[i].grassMaterial = null;
             allChunks[i].grassMaterial2 = null;
             allChunks[i].grassMaterial3 = null;
         }
+
         voteBuffer.Release();
         voteBuffer = null;
         scanBuffer.Release();
@@ -208,8 +214,5 @@ public class GrassInstantiator : MonoBehaviour
         groupSumArrayBuffer = null;
         scannedGroupSumBuffer.Release();
         scannedGroupSumBuffer = null;
-
     }
-
-
 }

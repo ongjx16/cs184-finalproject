@@ -347,9 +347,9 @@ MonoBehaviour:
   grassMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
   grassMaterial: {fileID: 2100000, guid: a2339907c34ea405e82ea64d72c8ac40, type: 2}
   groundPlane: {fileID: 83283689}
-  customRenderDistance: 20
-  fieldSize: 100
-  numChunks: 10
+  customRenderDistance: 200
+  fieldSize: 1000
+  numChunks: 100
   scale: 2
 --- !u!4 &1743463509
 Transform:
