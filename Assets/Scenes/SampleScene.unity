@@ -213,7 +213,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 77505958}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+<<<<<<< Updated upstream
   m_LocalPosition: {x: 0, y: 0.12, z: 0}
+=======
+  m_LocalPosition: {x: 0, y: 0, z: -0.11}
+>>>>>>> Stashed changes
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -420,10 +424,68 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
+<<<<<<< Updated upstream
   - component: {fileID: 963194228}
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
   - component: {fileID: 963194229}
+=======
+  - component: {fileID: 1743463509}
+  - component: {fileID: 1743463508}
+  m_Layer: 6
+  m_Name: Terrain
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1743463508
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743463507}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccfaa3a820bfc4bce85e765b9f01faad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  grassMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+  grassMaterial: {fileID: 2100000, guid: a2339907c34ea405e82ea64d72c8ac40, type: 2}
+  groundPlane: {fileID: 83283689}
+  customRenderDistance: 10
+  fieldSize: 100
+  numChunks: 10
+  scale: 2
+--- !u!4 &1743463509
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743463507}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 10, y: 10, z: 10}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1948916785
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1948916788}
+  - component: {fileID: 1948916787}
+  - component: {fileID: 1948916786}
+  - component: {fileID: 1948916789}
+>>>>>>> Stashed changes
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -462,9 +524,15 @@ Camera:
     y: 0
     width: 1
     height: 1
+<<<<<<< Updated upstream
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 26.991467
+=======
+  near clip plane: 0.01
+  far clip plane: 200
+  field of view: 60
+>>>>>>> Stashed changes
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -488,9 +556,15 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
+<<<<<<< Updated upstream
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0.19260801, y: 0.011827138, z: 0.0023216445, w: 0.98120177}
   m_LocalPosition: {x: -0.42, y: 2.65, z: -7.83}
+=======
+  m_GameObject: {fileID: 1948916785}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.02, y: 1, z: -0.14}
+>>>>>>> Stashed changes
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -511,10 +585,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   move_speed: 10
   pan_sensitivity: 5
+<<<<<<< Updated upstream
+=======
+  minHeight: 1.5
+>>>>>>> Stashed changes
   doubleTapThreshold: 0.5
   controlCamera: {fileID: 0}
-  default_fov: 60
-  min_fov: 5
+  default_fov: 100
+  min_fov: 0
   max_fov: 100
   zoom_speed: 1000
 --- !u!1001 &1455140384
