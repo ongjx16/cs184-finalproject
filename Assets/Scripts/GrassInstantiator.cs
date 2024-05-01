@@ -8,6 +8,7 @@ public class GrassInstantiator : MonoBehaviour
     public Mesh grassMesh;
     public Material grassMaterial;
     public GameObject groundPlane;
+    public float customRenderDistance = 50.0f;
 
     // `fieldSize`: The length of one side of the field.
     public int fieldSize = 100;
@@ -27,6 +28,16 @@ public class GrassInstantiator : MonoBehaviour
 
     // `GrassCluster`: Data for each grass cluster.
     // A grass cluster consists of 3 meshes of grass images placed in a asterisk (*)-like arrangement.
+
+    private Plane[] cameraFrustumPlanes;
+
+    Camera cam;
+    
+
+    void UpdateCameraFrustum() {
+        cameraFrustumPlanes = GeometryUtility.CalculateFrustumPlanes(cam);
+    }
+
     private struct GrassCluster
     {
         public Vector4 position;
@@ -50,19 +61,12 @@ public class GrassInstantiator : MonoBehaviour
         public ComputeBuffer argsBufferLOD;
         public ComputeBuffer culledposBuffer;
         public Bounds bounds;
-
     }
     private int numVoteThreadGroups, numGroupScanThreadGroups, numInstancesPerChunk, numThreadGroups;
     private ComputeBuffer voteBuffer, scanBuffer, groupSumArrayBuffer, scannedGroupSumBuffer;
 
     GrassChunk[] allChunks;
     uint[] args;
-    
-    //allows for fieldSize variable to be accessible for ground terrain mapping
-    public int GetFieldSize()
-    {
-        return fieldSize/numChunks;
-    }
 
     // Start is called before the first frame update.
     // Sets up the necessary variables before drawing.
@@ -78,10 +82,10 @@ public class GrassInstantiator : MonoBehaviour
         resolution *= scale;
 
         // Access the camera component
-        Camera cam = Camera.main; // Adjust this if you're not using the main camera
+        cam = Camera.main; // Adjust this if you're not using the main camera
 
         // Increase the field of view to broaden the visible area
-        cam.fieldOfView += 10.0f; // Increase by 5 degrees, adjust as necessary
+        //cam.fieldOfView += 10.0f; // Increase by 5 degrees, adjust as necessary
 
 
         cullGrassShader = Resources.Load<ComputeShader>("CullGrass");
@@ -89,31 +93,63 @@ public class GrassInstantiator : MonoBehaviour
         {
             Debug.LogError("cull grass compute shader not found");
         }
+        //cullGrassShader.SetFloat("_FovAdjustment", fovAdjustment);
         SetupGroundPlane();
         // Updates the position of the grass.
         populateField();
 
     }
+
     void SetupGroundPlane()
     {
         // Set plane size to match the grass field
         float planeScale = fieldSize / 10.0f;  // Unity default plane is 10x10 units
-        groundPlane.transform.localScale = new Vector3(planeScale/1.5f, 1, planeScale/1.5f);
-        groundPlane.transform.position = new Vector3(2*planeScale, 0, 2*planeScale);  // Center the plane and set slightly below grass
+        groundPlane.transform.localScale = new Vector3(planeScale / 1.5f, 1, planeScale / 1.5f);
+
+        // Offset the plane so that the corner is at the world origin
+        float halfWidth = planeScale / 1.5f * 5.0f;  // Half the width of the plane (5 is half of the original 10x10 size)
+        groundPlane.transform.position = new Vector3(halfWidth-10.0f, 0, halfWidth-10.0f);
 
         // Adjust texture tiling
         Material groundMaterial = groundPlane.GetComponent<Renderer>().material;
         groundMaterial.mainTextureScale = new Vector2(numChunks, numChunks);  // This will tile the texture across the whole plane uniformly
     }
-    void populateField()
-    {
-        allChunks = new GrassChunk[numChunks * numChunks];
 
-        for (int x = 0; x < numChunks; ++x)
-        {
-            for (int y = 0; y < numChunks; ++y)
-            {
+    // void populateField()
+    // {
+    //     allChunks = new GrassChunk[numChunks * numChunks];
+
+    //     for (int x = 0; x < numChunks; ++x)
+    //     {
+    //         for (int y = 0; y < numChunks; ++y)
+    //         {
+    //             allChunks[x + y * numChunks] = createChunk(x, y);
+    //         }
+    //     }
+    // }
+    // void populateField() {
+    //     allChunks = new GrassChunk[numChunks * numChunks];
+
+    //     for (int x = 0; x < numChunks; ++x) {
+    //         for (int y = 0; y < numChunks; ++y) {
+    //             allChunks[x + y * numChunks] = createChunk(x, y);
+    //             // Calculate and store the bounds for each chunk
+    //             Vector3 center = new Vector3(x + resolution/2.0f, 0, y + resolution/2.0f);
+    //             Vector3 size = new Vector3(resolution, 0, resolution);
+    //             allChunks[x + y * numChunks].bounds = new Bounds(center, size);
+    //         }
+    //     }
+    // }
+    void populateField() {
+        allChunks = new GrassChunk[numChunks * numChunks];
+        int baseResolution = fieldSize / numChunks; // Base resolution for each chunk
+
+        for (int x = 0; x < numChunks; ++x) {
+            for (int y = 0; y < numChunks; ++y) {
                 allChunks[x + y * numChunks] = createChunk(x, y);
+                Vector3 center = new Vector3(x*baseResolution + baseResolution/2.0f, 0, y*baseResolution + baseResolution/2.0f);
+                Vector3 size = new Vector3(baseResolution, 0, baseResolution);
+                allChunks[x + y * numChunks].bounds = new Bounds(center, size);
             }
         }
     }
@@ -160,18 +196,36 @@ public class GrassInstantiator : MonoBehaviour
 
 
     // Update is called once per frame. Draws the grass clusters.
-    void Update()
-    {
+    // void Update()
+    // {
 
-        // render by chunk
-        for (int i = 0; i < numChunks * numChunks; i++)
-        {
+    //     // render by chunk
+    //     for (int i = 0; i < numChunks * numChunks; i++)
+    //     {
            
-            Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
-            Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial2, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
-            Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial3, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
+    //         Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
+    //         Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial2, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
+    //         Graphics.DrawMeshInstancedIndirect(grassMesh, 0, allChunks[i].grassMaterial3, new Bounds(Vector3.zero, new Vector3(-500.0f, 200.0f, 500.0f)), allChunks[i].argsBuffer);
+    //     }
+    // }
+    void Update() {
+        UpdateCameraFrustum();  // Update the camera frustum each frame
+        Vector3 cameraPosition = cam.transform.position;
+        
+        for (int i = 0; i < numChunks * numChunks; i++) {
+            float distance = Vector3.Distance(allChunks[i].bounds.center, cameraPosition);
+            if (GeometryUtility.TestPlanesAABB(cameraFrustumPlanes, allChunks[i].bounds) && distance <= customRenderDistance) {
+                DrawGrassChunk(allChunks[i]);
+            }
         }
     }
+
+    void DrawGrassChunk(GrassChunk chunk) {
+        Graphics.DrawMeshInstancedIndirect(grassMesh, 0, chunk.grassMaterial, new Bounds(Vector3.zero, Vector3.one * 500.0f), chunk.argsBuffer);
+        Graphics.DrawMeshInstancedIndirect(grassMesh, 0, chunk.grassMaterial2, new Bounds(Vector3.zero, Vector3.one * 500.0f), chunk.argsBuffer);
+        Graphics.DrawMeshInstancedIndirect(grassMesh, 0, chunk.grassMaterial3, new Bounds(Vector3.zero, Vector3.one * 500.0f), chunk.argsBuffer);
+    }
+
 
     void OnDisable()
     {
