@@ -347,9 +347,9 @@ MonoBehaviour:
   grassMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
   grassMaterial: {fileID: 2100000, guid: a2339907c34ea405e82ea64d72c8ac40, type: 2}
   groundPlane: {fileID: 83283689}
-  customRenderDistance: 200
-  fieldSize: 1000
-  numChunks: 100
+  customRenderDistance: 100
+  fieldSize: 100
+  numChunks: 10
   scale: 2
 --- !u!4 &1743463509
 Transform:
@@ -443,14 +443,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1948916785}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.02, y: 1, z: -0.14}
+  m_LocalRotation: {x: 0.17364816, y: 0, z: 0, w: 0.9848078}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 20, y: 0, z: 0}
 --- !u!114 &1948916789
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -175,9 +175,9 @@ public class GrassInstantiator : MonoBehaviour
         
         for (int i = 0; i < numChunks * numChunks; i++) {
             float distance = Vector3.Distance(allChunks[i].bounds.center, cameraPosition);
-            // if (GeometryUtility.TestPlanesAABB(cameraFrustumPlanes, allChunks[i].bounds) && distance <= customRenderDistance) {
+            if (GeometryUtility.TestPlanesAABB(cameraFrustumPlanes, allChunks[i].bounds) && distance <= customRenderDistance) {
                 DrawGrassChunk(allChunks[i]);
-            // }
+            }
         }
     }
 
